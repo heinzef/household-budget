@@ -1,0 +1,51 @@
+html, body, #app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-family: "Sarabun", sans-serif;
+  font-size: 14px;
+}
+
+*:focus {
+  outline: none !important;
+  box-shadow: none;
+}
+
+.dashboard-content {
+  height: calc(80vh - 80px - 4rem);
+  overflow-y: auto;
+}
+
+.dashboard-content  > * {
+  margin-bottom: 50px;
+}
+
+.action-icon {
+  text-align: center;
+  cursor: pointer;
+}
+
+.print-only {
+  display: none;
+}
+
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

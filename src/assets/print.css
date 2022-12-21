@@ -1,0 +1,54 @@
+@media print {
+    #navSidebar {
+        display: none !important;
+    }
+
+    .right-page {
+        display: none !important;
+    }
+
+    .dashboard-header {
+        display: none !important;
+    }
+
+    .left-page {
+        width: 100% !important;
+    }
+
+    .left-content {
+        width: 100% !important;
+        height: 100vh !important;
+        padding-top: 0 !important;
+    }
+
+    .dashboard-content {
+        width: 100vw !important;
+        overflow-y: visible !important;
+    }
+
+    .p-scrolltop {
+        display: none !important;
+    }
+
+    .links-box {
+        display: none !important;
+    }
+
+    .action-icon, .p-sortable-column-icon {
+        display: none !important;
+    }
+
+    .non-print-column {
+        display: none !important;
+    }
+
+    .box-wrapper {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .print-only, .keep-for-printing {
+        display: flex !important;
+    }
+
+
+}

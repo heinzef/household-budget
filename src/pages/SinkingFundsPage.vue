@@ -1,0 +1,84 @@
+<template>
+    <div v-if="navigationStore.getActivePage === 'sinkingfunds'">
+      <DashboardHeader class="keep-for-printing">
+        <template #pageName>Spartöpfe</template>
+        <template #pageDetailText>Verwalte Deine Spartöpfe und lege neue Sparziele an.</template>
+        <template #rightContent>
+          <div class="balance" :class="{ 'red': sinkingFundsStore.getSinkingFundsReduced < 0 }">
+            Saldo: {{ formatter.format(sinkingFundsStore.getSinkingFundsReduced) }}
+          </div>
+        </template>
+    </DashboardHeader>
+    <div class="dashboard-content">
+      <div class="sf-content-wrapper">
+        <div class="sf-content-header">
+          <LinkBox :showAddIncome="false" :showAddFixCost="false" :showAddVarCost="false" :showNewSinkingFund="true" />
+        </div>
+        <DataTable :value="sinkingFundsStore.getSinkingFunds" responsiveLayout="scroll" :showGridlines="true">
+          <Column field="name" header="Name" :sortable="true" style="width: 60%"></Column>
+          <Column header="Wert" field="value" :sortable="true">
+            <template #body="{ data }">
+            <span class="bold" :class="{'red': data.value < 0}">
+              {{ formatter.format(data.value + sinkingFundsStore.getPaymentsOfSinkingFundReduced(data.id)) }}
+            </span>
+            </template>
+          </Column>
+          <Column style="width: 2rem" class="non-print-column">
+            <template #body>
+              <span class="action-icon" title="Editieren"><i class="pi pi-pencil" /></span>
+            </template>
+          </Column>
+          <Column style="width: 2rem" class="non-print-column">
+            <template #body="{data}">
+              <span class="action-icon" title="Löschen"
+                @click="dialogStore.openConfirmDeleteDialog(() => sinkingFundsStore.removeSinkingFundById(data.id))"><i class="pi pi-trash" /></span>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+      <ScrollTop target="parent" :threshold="100"/>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import formatter from '@/helpers/formatter';
+
+import DashboardHeader from '@/components/dashboard/DashboardHeader.vue';
+import LinkBox from '@/components/dashboard/LinkBox.vue';
+
+import { useNavigationStore } from '@/stores/navigation';
+import { useSinkingFundsStore } from '@/stores/sinkingfunds';
+import { useDialogStore } from '@/stores/dialogs';
+
+const navigationStore = useNavigationStore();
+const dialogStore = useDialogStore();
+const sinkingFundsStore = useSinkingFundsStore();
+</script>
+
+<style scoped lang="scss">
+.balance {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: black;
+}
+.bold {
+  font-weight: normal;
+}
+
+.red {
+  color: red;
+}
+
+.sf-content-wrapper {
+  padding: 0 2rem;
+
+  .sf-content-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+    padding-bottom: 1rem;
+  }
+}
+</style>
