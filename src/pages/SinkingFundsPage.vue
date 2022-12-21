@@ -31,7 +31,7 @@
           <Column style="width: 2rem" class="non-print-column">
             <template #body="{data}">
               <span class="action-icon" title="Löschen"
-                @click="dialogStore.openConfirmDeleteDialog(() => sinkingFundsStore.removeSinkingFundById(data.id))"><i class="pi pi-trash" /></span>
+                @click="dialogStore.openConfirmDeleteDialog(() => sinkingFundsStore.removeSinkingFundById(data.id), 'Alle dazugehörigen Einzahlungen und Ausgaben werden ebenfalls gelöscht')"><i class="pi pi-trash" /></span>
             </template>
           </Column>
         </DataTable>

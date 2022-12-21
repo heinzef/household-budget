@@ -14,6 +14,9 @@ export const useDialogStore = defineStore('dialogStore', () => {
 
     const newCategoryDialogOpen = ref(false);
     const newCategoryFor = ref(null);
+    const newCategoryDialogEditMode = ref(false);
+    const newCategoryDialogEditItem = ref(null);
+
     const _newCategoryInputText = ref('');
     const newCategoryInputText = computed({
         get: () => _newCategoryInputText.value,
@@ -23,8 +26,10 @@ export const useDialogStore = defineStore('dialogStore', () => {
         get: () => newCategoryDialogOpen.value,
         set: (value) => newCategoryDialogOpen.value = value,
     });
-    const openNewCategoryDialog = (forType) => {
-        _newCategoryInputText.value = '';
+    const openNewCategoryDialog = (forType, editItem = null) => {
+        newCategoryDialogEditItem.value = editItem;
+        newCategoryDialogEditMode.value = editItem !== null;
+        _newCategoryInputText.value = editItem ? editItem.name : '';
         newCategoryFor.value = forType;
         newCategoryDialogOpen.value = true;
     }
@@ -126,9 +131,11 @@ export const useDialogStore = defineStore('dialogStore', () => {
     });
 
     const onConfirmCallback = ref(() => {});
+    const confirmHintText = ref('');
 
-    const openConfirmDeleteDialog = (onConfirm) => {
+    const openConfirmDeleteDialog = (onConfirm, confirmHint = '') => {
         onConfirmCallback.value = onConfirm;
+        confirmHintText.value = confirmHint;
         _isConfirmDeleteDialogOpen.value = true;
     };
     const hideConfirmDeleteDialog = () => _isConfirmDeleteDialogOpen.value = false;
@@ -149,6 +156,8 @@ export const useDialogStore = defineStore('dialogStore', () => {
 
     return {
         newCategoryFor,
+        newCategoryDialogEditMode,
+        newCategoryDialogEditItem,
         newCategoryInputText,
         isNewCategoryDialogOpen,
         openNewCategoryDialog,
@@ -173,6 +182,7 @@ export const useDialogStore = defineStore('dialogStore', () => {
         openPieChartDialog,
         isConfirmDeleteDialogOpen,
         onConfirmCallback,
+        confirmHintText,
         openConfirmDeleteDialog,
         hideConfirmDeleteDialog,
         isManageCategoriesDialogOpen,

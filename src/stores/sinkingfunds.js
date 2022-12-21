@@ -77,6 +77,11 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
         saveSinkingFundPayments(sinkingFundsPayments.value);
     }
 
+    const removeSinkingFundPaymentsByMonth = (monthId) => {
+        sinkingFundsPayments.value = sinkingFundsPayments.value.filter((sp) => sp.relatedMonth !== monthId);
+        saveSinkingFundPayments(sinkingFundsPayments.value);
+    }
+
     const loadSinkingFundPaymentsFromService = () => sinkingFundsPayments.value = [...loadSinkingFundPayments()];
     loadSinkingFundPaymentsFromService();
 
@@ -96,5 +101,6 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
         getNegativeSinkingFundPaymentsForMonthReduced,
         addSinkingFundPayment,
         removeSinkingFundPaymentById,
+        removeSinkingFundPaymentsByMonth,
     }
 });

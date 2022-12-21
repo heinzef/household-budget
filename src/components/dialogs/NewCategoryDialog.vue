@@ -50,6 +50,9 @@ const costsStore = useCostsStore();
 const sinkingFundsStore = useSinkingFundsStore();
 const monthStore = useMonthStore();
 
+const isInEditMode = computed(() => dialogStore.newCategoryDialogEditMode);
+const editItem = computed(() => dialogStore.newCategoryDialogEditItem);
+
 const isFixCost = ref(false);
 const moneyInDaBank = ref(0);
 
@@ -57,25 +60,46 @@ const categoryForType = computed(() => dialogStore.newCategoryFor);
 
 const saveNewCategory = () => {
   if (categoryForType.value === 'incomes') {
-    incomeStore.addIncomeCategory(dialogStore.newCategoryInputText);
+    if (isInEditMode.value) {
+      incomeStore.editIncomeCategory(editItem.value, dialogStore.newCategoryInputText);
+    } else {
+      incomeStore.addIncomeCategory(dialogStore.newCategoryInputText);
+    }
   } else if (categoryForType.value === 'costs') {
     costsStore.addCostCategory(dialogStore.newCategoryInputText, isFixCost.value, selectedCostGroup.value.id);
   } else if (categoryForType.value === 'costgroups') {
-    costsStore.addCostCategoryGroup(dialogStore.newCategoryInputText);
+    if (isInEditMode.value) {
+      costsStore.editCostCategoryGroup(editItem.value, dialogStore.newCategoryInputText);
+    } else {
+      costsStore.addCostCategoryGroup(dialogStore.newCategoryInputText);
+    }
   } else if(categoryForType.value === 'sinkingfunds') {
     sinkingFundsStore.addSinkingFund(dialogStore.newCategoryInputText, moneyInDaBank.value);
   } else if(categoryForType.value === 'months') {
-    monthStore.addMonth(dialogStore.newCategoryInputText);
+    if (isInEditMode.value) {
+      monthStore.editMonth(editItem.value, dialogStore.newCategoryInputText);
+    } else {
+      monthStore.addMonth(dialogStore.newCategoryInputText);
+    }
   }
   dialogStore.hideNewCategoryDialog();
 };
 
 const headerText = computed(() => {
-  if (categoryForType.value === 'incomes') return 'Neue Einnahmenskategorie anlegen';
+  if (categoryForType.value === 'incomes') {
+    if (isInEditMode.value) return 'Einnahmenskategorie bearbeiten';
+    return 'Neue Einnahmenskategorie anlegen';
+  }
   if (categoryForType.value === 'costs') return 'Neue Kostenkategorie anlegen';
-  if (categoryForType.value === 'costgroups') return 'Neue Kostengruppe anlegen';
+  if (categoryForType.value === 'costgroups') {
+    if (isInEditMode.value) return 'Kostengruppe bearbeiten';
+    return 'Neue Kostengruppe anlegen';
+  }
   if (categoryForType.value === 'sinkingfunds') return 'Neuen Spartopf anlegen';
-  if (categoryForType.value === 'months') return 'Neuen Monat anlegen';
+  if (categoryForType.value === 'months') {
+    if (isInEditMode.value) return 'Monat bearbeiten';
+    return 'Neuen Monat anlegen';
+  }
   return 'Neue Kategorie anlegen';
 });
 

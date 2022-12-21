@@ -11,13 +11,13 @@
         </template>
       </Column>
       <Column style="width: 2rem" class="non-print-column">
-        <template #body>
-          <span class="action-icon" title="Editieren"><i class="pi pi-pencil" /></span>
+        <template #body="{data}">
+          <span class="action-icon" title="Editieren" @click="() => onEditClicked(data)"><i class="pi pi-pencil" /></span>
         </template>
       </Column>
       <Column style="width: 2rem" class="non-print-column">
         <template #body="{data}">
-          <span class="action-icon" title="Löschen" @click="dialogStore.openConfirmDeleteDialog(() => incomeStore.removeIncomeCategoryById(data.id))"><i class="pi pi-trash" /></span>
+          <span class="action-icon" title="Löschen" @click="() => onDeleteClicked(data)"><i class="pi pi-trash" /></span>
         </template>
       </Column>
     </DataTable>
@@ -54,13 +54,36 @@ const headerLabel = computed(() => {
   if (forCategoryType.value === 'costs') return 'Kostenkategorien verwalten';
   if (forCategoryType.value === 'costgroups') return 'Kostengruppen verwalten';
   if (forCategoryType.value === 'months') return 'Monate verwalten';
+  return '';
 });
 
 const addButtonLabel = computed(() => {
   if (forCategoryType.value === 'incomes' || forCategoryType.value === 'costs') return 'Neue Kategorie anlegen';
   if (forCategoryType.value === 'costgroups') return 'Neue Gruppe anlegen';
   if (forCategoryType.value === 'months') return 'Neuen Monat anlegen';
+  return '';
 });
+
+const hintMessage = computed(() => {
+  if (forCategoryType.value === 'incomes') return 'Alle dazugehörigen Einnahmen werden dabei ebenfalls gelöscht';
+  if (forCategoryType.value === 'costs') return 'Alle dazugehörigen Kosten werden dabei ebenfalls gelöscht';
+  if (forCategoryType.value === 'costgroups') return 'Alle dazugehörigen Kostenkategorien und Kosten werden dabei ebenfalls gelöscht';
+  if (forCategoryType.value === 'months') return 'Alle dazugehörigen Einnahmen, Kosten, Spartopfeinzahlungen und Spartopfausgaben werden dabei ebenfalls gelöscht';
+  return '';
+});
+
+const onEditClicked = (data) => {
+  dialogStore.openNewCategoryDialog(forCategoryType.value, data);
+};
+
+const onDeleteClicked = (data) => {
+  let deleteCallback = () => {};
+  if (forCategoryType.value === 'incomes') deleteCallback = () => incomeStore.removeIncomeCategoryById(data.id);
+  if (forCategoryType.value === 'costs') deleteCallback = () => costsStore.removeCostCategoryById(data.id);
+  if (forCategoryType.value === 'costgroups') deleteCallback = () => costsStore.removeCostCategoryGroupById(data.id);
+  if (forCategoryType.value === 'months') deleteCallback = () => monthsStore.removeMonthById(data.id);
+  dialogStore.openConfirmDeleteDialog(() => deleteCallback(), hintMessage.value);
+};
 </script>
 
 <style scoped lang="scss"></style>
