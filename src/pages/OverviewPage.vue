@@ -56,12 +56,13 @@
             :showPay="true" :payable="true"
             :onEditClicked="(item) => dialogStore.openNewMoneyEntryDialog('varcost', true, item)"
             :onDeleteClicked="(id) => costsStore.removeCostById(id)"/>
-          <MoneyTable :entries="sinkingFundsStore.getAllPositiveSinkingFundPaymentsForMonth(selectedMonth.id)" header="Spartopf Einzahlungen"
+          <MoneyTable :entries="sinkingFundsStore.getPositiveSinkingFundPaymentsForMonth(selectedMonth.id)" header="Spartopf Einzahlungen"
             :balance="sinkingFundsDepositsOfMonth"
             :onEditClicked="(item) => dialogStore.openNewMoneyEntryDialog('sinkingfunddeposit', true, item)"
             :onDeleteClicked="(id) => sinkingFundsStore.removeSinkingFundPaymentById(id)" />
           <MoneyTable :entries="sinkingFundsStore.getNegativeSinkingFundPaymentsForMonth(selectedMonth.id)" header="Spartopf Ausgaben" :invert="true"
             :balance="sinkingFundsWithdrawsOfMonth"
+            :showComments="true"
             :onEditClicked="(item) => dialogStore.openNewMoneyEntryDialog('sinkingfundwithdraw', true, item)"
             :onDeleteClicked="(id) => sinkingFundsStore.removeSinkingFundPaymentById(id)" />
           

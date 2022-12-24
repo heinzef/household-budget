@@ -9,6 +9,11 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
     const getSinkingFundsReduced = computed(() => sinkingfunds.value.reduce((acc, curr) => acc + curr.value + getPaymentsOfSinkingFundReduced(curr.id), 0));
 
     const getSinkingFundById = (id) => sinkingfunds.value.find((sf) => sf.id === id);
+    const getSinkingFundNameById = (id) => {
+        const sf = sinkingfunds.value.find((sf) => sf.id === id);
+        if (sf) return sf.name;
+        return '';
+    };
 
     const addSinkingFund = (name, value) => {
         const sinkingfundObject = {
@@ -20,6 +25,17 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
         sinkingfunds.value = [...sinkingfunds.value, sinkingfundObject];
         saveSinkingFunds(sinkingfunds.value);
     }
+
+    const editSinkingFund = (editItem, newName, newValue) => {
+        const sinkingFundsCopy = [...sinkingfunds.value];
+        const item = sinkingFundsCopy.find((sf) => sf.id === editItem.id);
+        if (item) {
+            item.name = newName;
+            item.value = newValue;
+            sinkingfunds.value = [...sinkingFundsCopy];
+            saveSinkingFunds(sinkingfunds.value);
+        }
+    };
     
     const loadSinkingFundsFromService = () => {
         sinkingfunds.value = [...loadSinkingFunds()];
@@ -27,33 +43,35 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
     loadSinkingFundsFromService();
 
     const removeSinkingFundById = (id) => {
+        removeSinkingFundPaymentsBySF(id);
         sinkingfunds.value = sinkingfunds.value.filter((sf) => sf.id !== id);
         saveSinkingFunds(sinkingfunds.value);
     }
 
     const sinkingFundsPayments = ref([]);
 
-    const getPaymentsOfSinkingFund = (sinkingFundId) => sinkingFundsPayments.value.filter((sp) => sp.relatedSF === sinkingFundId);
+    const getPaymentsOfSinkingFund = (sinkingFundId) => sinkingFundsPayments.value.filter((sp) => sp.relatedSF === sinkingFundId)
+        .map((sp) => ({...sp, name: getSinkingFundNameById(sp.relatedSF)}));
     const getPaymentsOfSinkingFundReduced = (sinkingFundId) => getPaymentsOfSinkingFund(sinkingFundId).reduce((acc, curr) => acc + curr.value, 0);
 
-    const getSinkingFundsPaymentsForMonth = (monthId) => sinkingFundsPayments.value.filter((sp) => sp.relatedMonth === monthId);
+    const getSinkingFundsPaymentsForMonth = (monthId) => sinkingFundsPayments.value.filter((sp) => sp.relatedMonth === monthId)
+        .map((sp) => ({...sp, name: getSinkingFundNameById(sp.relatedSF)}));
 
-    const getAllPositiveSinkingFundPaymentsForMonth = (monthId) => getSinkingFundsPaymentsForMonth(monthId).filter((sp) => sp.value >= 0);
-    const getPositiveSinkingFundPaymentsForMonth = (monthId) => getSinkingFundsPaymentsForMonth(monthId).filter((sp) => sp.value >= 0 && sp.includeInCalc);
+    const getPositiveSinkingFundPaymentsForMonth = (monthId) => getSinkingFundsPaymentsForMonth(monthId).filter((sp) => sp.value >= 0);
     const getPositiveSinkingFundPaymentsForMonthReduced = (monthId) => getPositiveSinkingFundPaymentsForMonth(monthId).reduce((acc, curr) => acc + curr.value, 0);
 
-    const getNegativeSinkingFundPaymentsForMonth = (monthId) => getSinkingFundsPaymentsForMonth(monthId).filter((sp) => sp.value < 0 && sp.includeInCalc);
+    const getNegativeSinkingFundPaymentsForMonth = (monthId) => getSinkingFundsPaymentsForMonth(monthId).filter((sp) => sp.value < 0);
     const getNegativeSinkingFundPaymentsForMonthReduced = (monthId) => getNegativeSinkingFundPaymentsForMonth(monthId).reduce((acc, curr) => acc + curr.value, 0);
 
-    const addSinkingFundPayment = (name, value, relatedSF, relatedMonth, includeInCalc = true, editItem = null) => {
+    const addSinkingFundPayment = (name, value, relatedSF, relatedMonth, comment, editItem = null) => {
         if (!editItem) {
             const paymentObject = {
                 id: v4(),
                 name,
                 value,
+                comment,
                 relatedSF,
                 relatedMonth,
-                includeInCalc,
                 createdAt: new Date()
             };
             sinkingFundsPayments.value = [...sinkingFundsPayments.value, paymentObject];
@@ -65,7 +83,7 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
                 sfpObject.value = value;
                 sfpObject.relatedSF = relatedSF,
                 sfpObject.relatedMonth = relatedMonth;
-                sfpObject.includeInCalc = includeInCalc,
+                sfpObject.comment = comment;
                 sinkingFundsPayments.value = [...sfpCopy];
             }
         }
@@ -74,6 +92,11 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
 
     const removeSinkingFundPaymentById = (id) => {
         sinkingFundsPayments.value = sinkingFundsPayments.value.filter((sp) => sp.id !== id);
+        saveSinkingFundPayments(sinkingFundsPayments.value);
+    }
+
+    const removeSinkingFundPaymentsBySF = (sfId) => {
+        sinkingFundsPayments.value = sinkingFundsPayments.value.filter((sp) => sp.relatedSF !== sfId);
         saveSinkingFundPayments(sinkingFundsPayments.value);
     }
 
@@ -89,12 +112,12 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
         getSinkingFunds,
         getSinkingFundsReduced,
         addSinkingFund,
+        editSinkingFund,
         removeSinkingFundById,
         getSinkingFundById,
         getPaymentsOfSinkingFund,
         getPaymentsOfSinkingFundReduced,
         getSinkingFundsPaymentsForMonth,
-        getAllPositiveSinkingFundPaymentsForMonth,
         getPositiveSinkingFundPaymentsForMonth,
         getPositiveSinkingFundPaymentsForMonthReduced,
         getNegativeSinkingFundPaymentsForMonth,

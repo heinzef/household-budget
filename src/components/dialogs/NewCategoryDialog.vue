@@ -53,8 +53,15 @@ const monthStore = useMonthStore();
 const isInEditMode = computed(() => dialogStore.newCategoryDialogEditMode);
 const editItem = computed(() => dialogStore.newCategoryDialogEditItem);
 
-const isFixCost = ref(false);
-const moneyInDaBank = ref(0);
+const isFixCost = computed({
+  get: () => dialogStore.newCategoryDialogRelatedBoolValue,
+  set: (value) => dialogStore.setNewCategoryDialogRelatedBoolValue(value),
+});
+
+const moneyInDaBank = computed({
+  get: () => dialogStore.newCategoryDialogRelatedNumberValue,
+  set: (value) => dialogStore.setNewCategoryDialogRelatedNumberValue(value),
+});
 
 const categoryForType = computed(() => dialogStore.newCategoryFor);
 
@@ -66,7 +73,11 @@ const saveNewCategory = () => {
       incomeStore.addIncomeCategory(dialogStore.newCategoryInputText);
     }
   } else if (categoryForType.value === 'costs') {
-    costsStore.addCostCategory(dialogStore.newCategoryInputText, isFixCost.value, selectedCostGroup.value.id);
+    if (isInEditMode.value) {
+      costsStore.editCostCategory(editItem.value, dialogStore.newCategoryInputText, isFixCost.value, selectedCostGroup.value.id);
+    } else {
+      costsStore.addCostCategory(dialogStore.newCategoryInputText, isFixCost.value, selectedCostGroup.value.id);
+    }
   } else if (categoryForType.value === 'costgroups') {
     if (isInEditMode.value) {
       costsStore.editCostCategoryGroup(editItem.value, dialogStore.newCategoryInputText);
@@ -74,7 +85,11 @@ const saveNewCategory = () => {
       costsStore.addCostCategoryGroup(dialogStore.newCategoryInputText);
     }
   } else if(categoryForType.value === 'sinkingfunds') {
-    sinkingFundsStore.addSinkingFund(dialogStore.newCategoryInputText, moneyInDaBank.value);
+    if (isInEditMode.value) {
+      sinkingFundsStore.editSinkingFund(editItem.value, dialogStore.newCategoryInputText, moneyInDaBank.value);
+    } else {
+      sinkingFundsStore.addSinkingFund(dialogStore.newCategoryInputText, moneyInDaBank.value);
+    }
   } else if(categoryForType.value === 'months') {
     if (isInEditMode.value) {
       monthStore.editMonth(editItem.value, dialogStore.newCategoryInputText);
@@ -95,7 +110,10 @@ const headerText = computed(() => {
     if (isInEditMode.value) return 'Kostengruppe bearbeiten';
     return 'Neue Kostengruppe anlegen';
   }
-  if (categoryForType.value === 'sinkingfunds') return 'Neuen Spartopf anlegen';
+  if (categoryForType.value === 'sinkingfunds') {
+    if (isInEditMode.value) return 'Spartopf bearbeiten';
+    return 'Neuen Spartopf anlegen';
+  }
   if (categoryForType.value === 'months') {
     if (isInEditMode.value) return 'Monat bearbeiten';
     return 'Neuen Monat anlegen';
@@ -104,10 +122,12 @@ const headerText = computed(() => {
 });
 
 const costGroups = computed(() => costsStore.costCategoryGroups);
-const selectedCostGroup = ref(null);
+const selectedCostGroup = computed({
+  get: () => dialogStore.newCategoryDialogParentItem,
+  set: (value) => dialogStore.setNewCategoryDialogParentItem(value),
+});
 
 const onHide = () => {
-  isFixCost.value = false;
   moneyInDaBank.value = 0;
 };
 </script>

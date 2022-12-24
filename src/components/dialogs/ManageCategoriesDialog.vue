@@ -2,20 +2,26 @@
 <Dialog :header="headerLabel" v-model:visible="dialogStore.isManageCategoriesDialogOpen"
   :breakpoints="{'960px': '75vw', '640px': '90vw'}" :style="{width: '75vw'}" :modal="true" :draggable="false">
   <div>
-    <Button :label="addButtonLabel" @click="dialogStore.openNewCategoryDialog(forCategoryType)"></Button>
+    <Button v-if="addButtonLabel.length > 0" :label="addButtonLabel" @click="dialogStore.openNewCategoryDialog(forCategoryType)"></Button>
     <DataTable :value="entries" responsiveLayout="scroll" :showGridlines="true">
-      <Column field="name" header="Name" style="min-width: 60%"></Column>
+      <Column v-if="forCategoryType !== 'varcostpayments'" field="name" header="Name" style="min-width: 60%"></Column>
+      <Column v-else field="comment" header="Kommentar" style="min-width: 60%"></Column>
+      <Column v-if="forCategoryType === 'varcostpayments'" field="value" header="Betrag">
+        <template #body="{data}">
+          {{ formatter.format(data.value) }}
+        </template>
+      </Column>
       <Column v-if="forCategoryType === 'costs'" field="isFixCost" header="Kostentyp">
         <template #body="{data}">
           {{ data.isFixCost ? 'Fixkosten' : 'Variable Kosten' }}
         </template>
       </Column>
-      <Column style="width: 2rem" class="non-print-column">
+      <Column v-if="forCategoryType !== 'varcostpayments'" style="width: 2rem" class="non-print-column">
         <template #body="{data}">
           <span class="action-icon" title="Editieren" @click="() => onEditClicked(data)"><i class="pi pi-pencil" /></span>
         </template>
       </Column>
-      <Column style="width: 2rem" class="non-print-column">
+      <Column v-if="forCategoryType !== 'varcostpayments'" style="width: 2rem" class="non-print-column">
         <template #body="{data}">
           <span class="action-icon" title="Löschen" @click="() => onDeleteClicked(data)"><i class="pi pi-trash" /></span>
         </template>
@@ -27,6 +33,8 @@
 
 <script setup>
 import { computed } from 'vue';
+
+import formatter from '@/helpers/formatter';
 
 import { useDialogStore } from '@/stores/dialogs';
 import { useIncomeStore } from '@/stores/incomes';
@@ -40,10 +48,12 @@ const costsStore = useCostsStore();
 const monthsStore = useMonthStore();
 
 const forCategoryType = computed(() => dialogStore.manageCategoriesDialogCategoryType);
+const parentItem = computed(() => dialogStore.manageCategoriesDialogParentItem);
 
 const entries = computed(() => {
   if (forCategoryType.value === 'incomes') return incomeStore.getIncomeCategories;
   if (forCategoryType.value === 'costs') return costsStore.getAllCostCategories;
+  if (forCategoryType.value === 'varcostpayments') return costsStore.getCostPaymentsForRelatedCost(parentItem.value);
   if (forCategoryType.value === 'costgroups') return costsStore.getCategoryGroups;
   if (forCategoryType.value === 'months') return monthsStore.getMonthsForDropdown;
   return [];
@@ -52,6 +62,7 @@ const entries = computed(() => {
 const headerLabel = computed(() => {
   if (forCategoryType.value === 'incomes') return 'Einnahmekategorien verwalten';
   if (forCategoryType.value === 'costs') return 'Kostenkategorien verwalten';
+  if (forCategoryType.value === 'varcostpayments') return 'Eingetragene Kosten ansehen';
   if (forCategoryType.value === 'costgroups') return 'Kostengruppen verwalten';
   if (forCategoryType.value === 'months') return 'Monate verwalten';
   return '';

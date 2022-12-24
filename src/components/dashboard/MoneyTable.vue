@@ -2,10 +2,11 @@
 <div>
   <div class="table-headline">
     <div>{{ props.header }}</div>
-    <div>Gesamt: {{ formatter.format(props.balance) }}</div>
+    <div>Gesamt: {{ formatter.format(props.invert && props.balance < 0 ? props.balance * -1 : props.balance) }}</div>
   </div>
   <DataTable :value="props.entries" responsiveLayout="scroll" :showGridlines="true">
     <Column field="name" header="Name" style="width: 60%"></Column>
+    <Column v-if="props.showComments" field="comment" header="Kommentar"></Column>
     <Column header="Wert">
       <template #body="{ data }">
         {{ formatter.format(props.invert ? data.value * -1 : data.value) }}
@@ -14,6 +15,11 @@
     <Column header="Ausgegeben"  v-if="props.showPay">
       <template #body="{ data }">
         <span v-if="data.paid !== undefined">{{ formatter.format(data.paid) }}</span>
+      </template>
+    </Column>
+    <Column style="width: 2rem" v-if="props.payable" class="non-print-column">
+      <template #body="{ data }">
+        <span class="action-icon" title="Ansehen" @click="dialogStore.openManageCategoriesDialog('varcostpayments', data.id)"><i class="pi pi-list" /></span>
       </template>
     </Column>
     <Column style="width: 2rem" v-if="props.payable" class="non-print-column">
@@ -48,6 +54,10 @@ const props = defineProps({
     default: 0,
   },
   header: String,
+  showComments: {
+    type: Boolean,
+    default: false,
+  },
   showPay: Boolean,
   payable: Boolean,
   onEditClicked: Function,

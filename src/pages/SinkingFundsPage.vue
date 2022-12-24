@@ -24,8 +24,8 @@
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">
-            <template #body>
-              <span class="action-icon" title="Editieren"><i class="pi pi-pencil" /></span>
+            <template #body="{data}">
+              <span class="action-icon" title="Editieren" @click="dialogStore.openNewCategoryDialog('sinkingfunds', data)"><i class="pi pi-pencil" /></span>
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">
