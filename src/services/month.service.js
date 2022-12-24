@@ -1,10 +1,4 @@
-export const saveMonth = (month) => {
-    let months = [];
-    const monthsAsString = localStorage.getItem('months');
-    if (monthsAsString && monthsAsString.length > 0) {
-        months = JSON.parse(monthsAsString);
-    }
-    months.push(month);
+export const saveMonths = (months) => {
     localStorage.setItem('months', JSON.stringify(months));
 };
 

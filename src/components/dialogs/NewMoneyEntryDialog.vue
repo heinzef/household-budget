@@ -7,8 +7,8 @@
           <span class="p-inputgroup-addon">
               <i class="pi pi-euro"></i>
           </span>
-          <InputNumber v-model="dialogStore.newMoneyEntryAmountInput"
-            mode="decimal" locale="de-DE" :minFractionDigits="2"/>
+          <InputNumber v-model="dialogStore.newMoneyEntryAmountInput" @input="(ev) => dialogStore.setNewMoneyEntryAmountInput(ev.value)"
+            mode="decimal" locale="de-DE" :minFractionDigits="2" @keyup.enter="saveNewMoneyEntry"/>
         </div>
         <div><label>{{ relatedItemText }}:</label></div>
         <div class="p-inputgroup">
@@ -20,9 +20,11 @@
           <Dropdown class="month-select" :filter="true" v-model="dialogStore.newMoneyEntryRelatedMonth" :showClear="true"
               placeholder="Wähle einen Monat" :options="monthStore.getMonthsForDropdown" optionLabel="name" />
         </div>
-        <div v-if="entryType === 'sinkingfunddeposit'">
-          <label>In Kalkulation einbeziehen:</label>
-          <Checkbox v-model="includeInCalc" :binary="true" />
+        <div v-if="entryType === 'sinkingfundwithdraw'">
+          <div><label>Kommentar:</label></div>
+          <div class="p-inputgroup">
+            <InputText v-model="dialogStore.newMoneyEntryCommentInput" @keyup.enter="saveNewMoneyEntry"/>
+          </div>
         </div>
       </div>
       <template #footer>
@@ -51,7 +53,6 @@ const entryType = computed(() => dialogStore.newMoneyEntryType);
 const isInEditMode = computed(() => dialogStore.newMoneyEntryDialogIsInEditMode);
 const editItem = computed(() => dialogStore.newMoneyEntryEditItem);
 
-const includeInCalc = ref(true);
 
 const saveNewMoneyEntry = () => {
   if (entryType.value === 'income') {
@@ -65,10 +66,10 @@ const saveNewMoneyEntry = () => {
       false, dialogStore.newMoneyEntryRelatedItem.id, dialogStore.newMoneyEntryRelatedMonth.id, editItem.value);
   } else if (entryType.value === 'sinkingfunddeposit') {
     sinkingFundsStore.addSinkingFundPayment(dialogStore.newMoneyEntryRelatedItem.name, dialogStore.newMoneyEntryAmountInput,
-      dialogStore.newMoneyEntryRelatedItem.id, dialogStore.newMoneyEntryRelatedMonth.id, includeInCalc.value, editItem.value);
+      dialogStore.newMoneyEntryRelatedItem.id, dialogStore.newMoneyEntryRelatedMonth.id, '', editItem.value);
   } else if (entryType.value === 'sinkingfundwithdraw') {
     sinkingFundsStore.addSinkingFundPayment(dialogStore.newMoneyEntryRelatedItem.name, dialogStore.newMoneyEntryAmountInput * -1,
-      dialogStore.newMoneyEntryRelatedItem.id, dialogStore.newMoneyEntryRelatedMonth.id, true, editItem.value);
+      dialogStore.newMoneyEntryRelatedItem.id, dialogStore.newMoneyEntryRelatedMonth.id, dialogStore.newMoneyEntryCommentInput, editItem.value);
   }
   dialogStore.hideNewMoneyEntryDialog();
 };

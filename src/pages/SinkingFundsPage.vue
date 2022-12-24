@@ -24,14 +24,14 @@
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">
-            <template #body>
-              <span class="action-icon" title="Editieren"><i class="pi pi-pencil" /></span>
+            <template #body="{data}">
+              <span class="action-icon" title="Editieren" @click="dialogStore.openNewCategoryDialog('sinkingfunds', data)"><i class="pi pi-pencil" /></span>
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">
             <template #body="{data}">
               <span class="action-icon" title="Löschen"
-                @click="dialogStore.openConfirmDeleteDialog(() => sinkingFundsStore.removeSinkingFundById(data.id))"><i class="pi pi-trash" /></span>
+                @click="dialogStore.openConfirmDeleteDialog(() => sinkingFundsStore.removeSinkingFundById(data.id), 'Alle dazugehörigen Einzahlungen und Ausgaben werden ebenfalls gelöscht')"><i class="pi pi-trash" /></span>
             </template>
           </Column>
         </DataTable>

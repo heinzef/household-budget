@@ -33,6 +33,16 @@ export const useIncomeStore = defineStore("incomeStore", () => {
         saveIncomes(incomes.value);
     }
 
+    const removeIncomeByCategoryId = (catId) => {
+        incomes.value = incomes.value.filter((inc) => inc.relatedCategory !== catId);
+        saveIncomes(incomes.value);
+    }
+
+    const removeIncomesByMonthId = (monthId) => {
+        incomes.value = incomes.value.filter((inc) => inc.relatedMonth !== monthId);
+        saveIncomes(incomes.value);
+    }
+
     const incomeCategories = ref([]);
     const _incomeCategoryInputText = ref('');
     const incomeCategoryInputText = computed({
@@ -56,12 +66,23 @@ export const useIncomeStore = defineStore("incomeStore", () => {
         saveIncomeCategories(incomeCategories.value);
     }
 
+    const editIncomeCategory = (editItem, newName) => {
+        const incomeCategoriesCopy = [...incomeCategories.value];
+        const item = incomeCategoriesCopy.find((incC) => incC.id === editItem.id);
+        if (item) {
+            item.name = newName;
+            incomeCategories.value = [...incomeCategoriesCopy];
+            saveIncomeCategories(incomeCategories.value);
+        }
+    };
+
     const loadIncomesAndCategories = () => {
         incomes.value = [...loadIncomes()];
         incomeCategories.value = [...loadIncomeCategories()];
     }
 
     const removeIncomeCategoryById = (catId) => {
+        removeIncomeByCategoryId(catId);
         incomeCategories.value = incomeCategories.value.filter((incC) => incC.id !== catId);
         saveIncomeCategories(incomeCategories.value);
     }
@@ -88,11 +109,13 @@ export const useIncomeStore = defineStore("incomeStore", () => {
     return {
         getIncomesForMonth,
         getIncomesForMonthReduced,
+        removeIncomesByMonthId,
         getIncomeCategories,
         getIncomeCategoryById,
         getIncomeCategoryNameById,
         incomeCategoryInputText,
         addIncomeCategory,
+        editIncomeCategory,
         removeIncomeCategoryById,
         saveNewIncome,
         removeIncomeById,

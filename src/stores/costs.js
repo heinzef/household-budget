@@ -8,13 +8,15 @@ export const useCostsStore = defineStore("costsStore", () => {
     const costs = ref([]);
 
     const getFixCostsForMonth = (monthId) => {
-        return costs.value.filter((cost) => cost.relatedMonth === monthId && cost.isFixCost);
+        return costs.value.filter((cost) => cost.relatedMonth === monthId && cost.isFixCost)
+            .map((c) => ({...c, name: getCostCategoryNameById(c.relatedCategory)}));
     };
 
     const getFixCostsForMonthReduced = (monthId) => getFixCostsForMonth(monthId).reduce((acc, curr) => acc + curr.value, 0);
 
     const getVarCostsForMonth = (monthId) => {
-        return costs.value.filter((cost) => cost.relatedMonth === monthId && !cost.isFixCost);
+        return costs.value.filter((cost) => cost.relatedMonth === monthId && !cost.isFixCost)
+            .map((c) => ({...c, name: getCostCategoryNameById(c.relatedCategory)}));;
     };
 
     const getVarCostsForMonthReduced = (monthId, paid = true) => getVarCostsForMonth(monthId).reduce((acc, curr) => acc + (paid ? curr.paid : curr.value), 0);
@@ -54,7 +56,22 @@ export const useCostsStore = defineStore("costsStore", () => {
     const getCostById = (id) => costs.value.find((c) => c.id === id);
 
     const removeCostById = (id) => {
+        removeCostPaymentByCostId(id);
         costs.value = costs.value.filter((c) => c.id !== id);
+        saveCosts(costs.value);
+    }
+
+    const removeCostsByMonth = (monthId) => {
+        const costsToRemove = costs.value.filter((c) => c.relatedMonth === monthId);
+        removeCostPaymentByCostIds(costsToRemove.map((ctr) => ctr.id));
+        costs.value = costs.value.filter((c) => c.relatedMonth !== monthId);
+        saveCosts(costs.value);
+    }
+
+    const removeCostsByCategory = (catId) => {
+        const costsToRemove = costs.value.filter((c) => c.relatedCategory === catId);
+        removeCostPaymentByCostIds(costsToRemove.map((ctr) => ctr.id));
+        costs.value = costs.value.filter((c) => c.relatedCategory !== catId);
         saveCosts(costs.value);
     }
 
@@ -75,6 +92,20 @@ export const useCostsStore = defineStore("costsStore", () => {
             saveCosts(costs.value);
         }
     }
+
+    const getCostPaymentsForRelatedCost = (relatedCostId) => {
+        return costPayments.value.filter((cp) => cp.relatedCostId === relatedCostId);
+    };
+
+    const removeCostPaymentByCostId = (costId) => {
+        costPayments.value = costPayments.value.filter((cp) => cp.relatedCostId !== costId);
+        saveCostPayments(costPayments.value);
+    };
+
+    const removeCostPaymentByCostIds = (costIds) => {
+        costPayments.value = costPayments.value.filter((cp) => !costIds.includes(cp.relatedCostId));
+        saveCostPayments(costPayments.value);
+    };
 
     const loadCostPaymentsFromService = () => costPayments.value = [...loadCostPayments()];
     loadCostPaymentsFromService();
@@ -100,7 +131,35 @@ export const useCostsStore = defineStore("costsStore", () => {
         saveCostsCategories(costCategories.value);
     }
 
+    const editCostCategory = (editItem, newName, isFixCost, relatedGroup) => {
+        const categoriesCopy = [...costCategories.value];
+        const item = categoriesCopy.find((cc) => cc.id === editItem.id);
+        if (item) {
+            item.name = newName;
+            item.isFixCost = isFixCost;
+            item.relatedGroup = relatedGroup;
+            costCategories.value = [...categoriesCopy];
+            saveCostsCategories(costCategories.value);
+        }
+    };
+
     const getCostCategoryById = (id) => costCategories.value.find((cc) => cc.id === id);
+    const getCostCategoryNameById = (id) => {
+        const category = costCategories.value.find((cc) => cc.id === id);
+        if (category) return category.name;
+        return '';
+    };
+
+    const removeCostCategoryById = (id) => {
+        removeCostsByCategory(id);
+        costCategories.value = costCategories.value.filter((cc) => cc.id !== id);
+        saveCostsCategories(costCategories.value);
+    }
+
+    const removeCostCategoriesByGroupId = (groupId) => {
+        costCategories.value = costCategories.value.filter((cc) => cc.relatedGroup !== groupId);
+        saveCostsCategories(costCategories.value);
+    }
 
     const getCostsForCategory = (categoryId, monthId = null) => {
         const costsForCat =  costs.value.filter((c) => c.relatedCategory === categoryId &&
@@ -124,6 +183,18 @@ export const useCostsStore = defineStore("costsStore", () => {
         saveCostCategoryGroups(costCategoryGroups.value);
     };
 
+    const editCostCategoryGroup = (editItem, newName) => {
+        const groupsCopy = [...costCategoryGroups.value];
+        const item = groupsCopy.find((g) => g.id === editItem.id);
+        if (item) {
+            item.name = newName;
+            costCategoryGroups.value = [...groupsCopy];
+            saveCostCategoryGroups(costCategoryGroups.value);
+        }
+    };
+
+    const getCostCategoryGroupById = (id) => costCategoryGroups.value.find((g) => g.id === id);
+
     const getCostCategoriesForGroup = (groupId) => costCategories.value.filter((cc) => cc.relatedGroup === groupId);
 
     const getCostsForCategoryGroup = (groupdId, monthId = null) => {
@@ -132,6 +203,16 @@ export const useCostsStore = defineStore("costsStore", () => {
             costs.push(getCostsForCategory(cc.id, monthId));
         });
         return costs;
+    };
+
+    const removeCostCategoryGroupById = (id) => {
+        const categories = getCostCategoriesForGroup(id);
+        categories.forEach((cat) => {
+            removeCostsByCategory(cat.id);
+        })
+        removeCostCategoriesByGroupId(id);
+        costCategoryGroups.value = costCategoryGroups.value.filter((ccGroup) => ccGroup.id !== id);
+        saveCostCategoryGroups(costCategoryGroups.value);
     };
 
     const getCostsForMonthGrouped = (monthId) => {
@@ -160,15 +241,23 @@ export const useCostsStore = defineStore("costsStore", () => {
         addCost,
         getCostById,
         removeCostById,
+        removeCostsByCategory,
+        removeCostsByMonth,
         addCostPayment,
+        getCostPaymentsForRelatedCost,
         getFixCostCategories,
         getVarCostCategories,
         getAllCostCategories,
         addCostCategory,
+        editCostCategory,
+        removeCostCategoryById,
         getCostCategoryById,
         costCategoryGroups,
         getCategoryGroups,
         addCostCategoryGroup,
+        editCostCategoryGroup,
+        getCostCategoryGroupById,
+        removeCostCategoryGroupById,
         getCostCategoriesForGroup,
         getCostsForCategoryGroup,
         getCostsForMonthGrouped,

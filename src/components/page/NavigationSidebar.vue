@@ -6,7 +6,7 @@
 			<NavigationItem page="sinkingfunds" icon="pi-wallet" />
 			<!---<NavigationItem page="charts" icon="pi-chart-pie" />-->
 		</div>
-		<Avatar image="/IMG_0470.JPG" class="profile-icon mr-2" size="large" shape="circle" @click="() => navigationStore.setActivePage('profile')" />
+		<Avatar image="/profile_light.jpg" class="profile-icon" size="large" shape="circle" @click="() => navigationStore.setActivePage('profile')" />
 	</div>
 </template>
 

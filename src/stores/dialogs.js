@@ -14,6 +14,18 @@ export const useDialogStore = defineStore('dialogStore', () => {
 
     const newCategoryDialogOpen = ref(false);
     const newCategoryFor = ref(null);
+    const newCategoryDialogEditMode = ref(false);
+    const newCategoryDialogEditItem = ref(null);
+
+    const newCategoryDialogParentItem = ref(null);
+    const setNewCategoryDialogParentItem = (parent) => newCategoryDialogParentItem.value = parent;
+
+    const newCategoryDialogRelatedBoolValue = ref(false);
+    const setNewCategoryDialogRelatedBoolValue = (boolVal) => newCategoryDialogRelatedBoolValue.value = boolVal;
+
+    const newCategoryDialogRelatedNumberValue = ref(0);
+    const setNewCategoryDialogRelatedNumberValue = (numVal) => newCategoryDialogRelatedNumberValue.value = numVal;
+
     const _newCategoryInputText = ref('');
     const newCategoryInputText = computed({
         get: () => _newCategoryInputText.value,
@@ -23,8 +35,22 @@ export const useDialogStore = defineStore('dialogStore', () => {
         get: () => newCategoryDialogOpen.value,
         set: (value) => newCategoryDialogOpen.value = value,
     });
-    const openNewCategoryDialog = (forType) => {
-        _newCategoryInputText.value = '';
+    const openNewCategoryDialog = (forType, editItem = null) => {
+        newCategoryDialogEditItem.value = editItem;
+        newCategoryDialogEditMode.value = editItem !== null;
+        newCategoryDialogRelatedBoolValue.value = editItem && editItem.isFixCost;
+
+        if (editItem && editItem.relatedGroup) {
+            newCategoryDialogParentItem.value = costsStore.getCostCategoryGroupById(editItem.relatedGroup);
+        }
+
+        if (editItem && editItem.value) {
+            newCategoryDialogRelatedNumberValue.value = editItem.value;
+        }
+        
+        _newCategoryInputText.value = editItem ? editItem.name : '';
+
+
         newCategoryFor.value = forType;
         newCategoryDialogOpen.value = true;
     }
@@ -42,6 +68,13 @@ export const useDialogStore = defineStore('dialogStore', () => {
     const newMoneyEntryAmountInput = computed({
         get: () => _newMoneyEntryAmountInput.value,
         set: (value) => _newMoneyEntryAmountInput.value = value,
+    });
+    const setNewMoneyEntryAmountInput = (amount) => _newMoneyEntryAmountInput.value = amount;
+
+    const _newMoneyEntryCommentInput = ref('');
+    const newMoneyEntryCommentInput = computed({
+        get: () => _newMoneyEntryCommentInput.value,
+        set: (value) => _newMoneyEntryCommentInput.value = value,
     });
 
     const _newMoneyEntryRelatedItem = ref(null);
@@ -68,10 +101,12 @@ export const useDialogStore = defineStore('dialogStore', () => {
         newMoneyEntryEditItem.value = editItem;
         if (!editMode) {
             _newMoneyEntryAmountInput.value = 0;
+            _newMoneyEntryCommentInput.value = '';
             _newMoneyEntryRelatedItem.value = null;
         } else {
             _newMoneyEntryAmountInput.value = Math.abs(editItem.value);
             _newMoneyEntryRelatedMonth.value = monthStore.getMonthById(editItem.relatedMonth);
+            _newMoneyEntryCommentInput.value = editItem.comment;
             if (forType === 'income') {
                 _newMoneyEntryRelatedItem.value = incomeStore.getIncomeCategoryById(editItem.relatedCategory);
             } else if (forType === 'fixcost') {
@@ -126,9 +161,11 @@ export const useDialogStore = defineStore('dialogStore', () => {
     });
 
     const onConfirmCallback = ref(() => {});
+    const confirmHintText = ref('');
 
-    const openConfirmDeleteDialog = (onConfirm) => {
+    const openConfirmDeleteDialog = (onConfirm, confirmHint = '') => {
         onConfirmCallback.value = onConfirm;
+        confirmHintText.value = confirmHint;
         _isConfirmDeleteDialogOpen.value = true;
     };
     const hideConfirmDeleteDialog = () => _isConfirmDeleteDialogOpen.value = false;
@@ -140,15 +177,25 @@ export const useDialogStore = defineStore('dialogStore', () => {
     });
 
     const manageCategoriesDialogCategoryType = ref('');
+    const manageCategoriesDialogParentItem = ref(null);
 
-    const openManageCategoriesDialog = (forType) => {
+    const openManageCategoriesDialog = (forType, parentItem = null) => {
         manageCategoriesDialogCategoryType.value = forType;
+        manageCategoriesDialogParentItem.value = parentItem;
         _manageCategoriesDialogOpen.value = true;
     };
     const hideManageCategoriesDialog = () => _manageCategoriesDialogOpen.value = false;
 
     return {
         newCategoryFor,
+        newCategoryDialogEditMode,
+        newCategoryDialogEditItem,
+        newCategoryDialogParentItem,
+        setNewCategoryDialogParentItem,
+        newCategoryDialogRelatedBoolValue,
+        setNewCategoryDialogRelatedBoolValue,
+        newCategoryDialogRelatedNumberValue,
+        setNewCategoryDialogRelatedNumberValue,
         newCategoryInputText,
         isNewCategoryDialogOpen,
         openNewCategoryDialog,
@@ -160,8 +207,10 @@ export const useDialogStore = defineStore('dialogStore', () => {
         openNewMoneyEntryDialog,
         hideNewMoneyEntryDialog,
         newMoneyEntryAmountInput,
+        newMoneyEntryCommentInput,
         newMoneyEntryRelatedItem,
         newMoneyEntryRelatedMonth,
+        setNewMoneyEntryAmountInput,
         setNewMoneyEntryRelatedMonth,
         isNewCostPaymentDialogOpen,
         newCostPaymentRelatedCostName,
@@ -173,10 +222,12 @@ export const useDialogStore = defineStore('dialogStore', () => {
         openPieChartDialog,
         isConfirmDeleteDialogOpen,
         onConfirmCallback,
+        confirmHintText,
         openConfirmDeleteDialog,
         hideConfirmDeleteDialog,
         isManageCategoriesDialogOpen,
         manageCategoriesDialogCategoryType,
+        manageCategoriesDialogParentItem,
         openManageCategoriesDialog,
         hideManageCategoriesDialog,
     };

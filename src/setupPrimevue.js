@@ -12,6 +12,7 @@ import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import ScrollTop from 'primevue/scrolltop';
 import Chart from 'primevue/chart';
+import Message from 'primevue/message';
 
 
 
@@ -30,4 +31,5 @@ export default (app) => {
     app.component('Column', Column);
     app.component('ScrollTop', ScrollTop);
     app.component('Chart', Chart);
+    app.component('Message', Message);
 };
