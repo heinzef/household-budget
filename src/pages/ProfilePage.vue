@@ -6,6 +6,8 @@
       </DashboardHeader>
       <ColorPicker :inline="false" v-model="leftBGColor" />
       <ColorPicker :inline="false" v-model="rightBGColor" />
+      <div><Button label="Speichern" @click="colorStore.saveColorsWithService()"></Button></div>
+      <div><Button label="Reset" @click="colorStore.resetColors()"></Button></div>
     </div>
 </template>
 

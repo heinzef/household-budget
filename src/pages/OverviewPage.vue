@@ -1,7 +1,11 @@
 <template>
   <div v-if="navigationStore.getActivePage === 'overview'">
     <DashboardHeader>
-      <template #pageName>Guten {{greeting}}, Fabian!</template>
+      <template #pageName>
+        <span>Guten {{greeting}}</span>
+        <span v-if="profileStore.hasUserName">, {{ profileStore.getUserName }}</span>
+        <span>!</span>      
+      </template>
       <template #rightContent>
         <Dropdown class="month-select" :filter="true" v-model="selectedMonth"
             placeholder="Wähle einen Monat" :options="monthStore.getMonthsForDropdown" optionLabel="name" />
@@ -53,6 +57,7 @@
             :onDeleteClicked="(id) => costsStore.removeCostById(id)"/>
           <MoneyTable :entries="costsStore.getVarCostsForMonth(selectedMonth.id)" header="Variable Kosten"
             :balance="costsStore.getVarCostsForMonthReduced(selectedMonth.id, false)"
+            :additionalBalanceText="` (Offen: ${formatter.format(costsStore.getVarCostsForMonthReduced(selectedMonth.id, false) - costsStore.getVarCostsForMonthReduced(selectedMonth.id, true))})`"
             :showPay="true" :payable="true"
             :onEditClicked="(item) => dialogStore.openNewMoneyEntryDialog('varcost', true, item)"
             :onDeleteClicked="(id) => costsStore.removeCostById(id)"/>
@@ -86,6 +91,7 @@ import { useCostsStore } from '@/stores/costs';
 import { useSinkingFundsStore } from '@/stores/sinkingfunds';
 import { useNavigationStore } from '@/stores/navigation';
 import { useDialogStore } from '@/stores/dialogs';
+import { useProfileStore } from '@/stores/profile';
 
 
 import formatter from '@/helpers/formatter';
@@ -111,6 +117,7 @@ const balanceOfMonth = computed(() => incomesOfMonth.value - costsOfMonth.value 
 
 const navigationStore = useNavigationStore();
 const dialogStore = useDialogStore();
+const profileStore = useProfileStore();
 
 const now = ref(new Date());
 const greeting = computed(() => {

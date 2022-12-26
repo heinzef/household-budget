@@ -19,7 +19,7 @@ export const useCostsStore = defineStore("costsStore", () => {
             .map((c) => ({...c, name: getCostCategoryNameById(c.relatedCategory)}));;
     };
 
-    const getVarCostsForMonthReduced = (monthId, paid = true) => getVarCostsForMonth(monthId).reduce((acc, curr) => acc + (paid ? curr.paid : curr.value), 0);
+    const getVarCostsForMonthReduced = (monthId, paid = true) => getVarCostsForMonth(monthId).reduce((acc, curr) => acc + (paid ? getVarCostPaidValueById(curr.id) : curr.value), 0);
 
     const loadCostsFromService = () => costs.value = [...loadCosts()];
     loadCostsFromService();
@@ -34,7 +34,6 @@ export const useCostsStore = defineStore("costsStore", () => {
                 isFixCost,
                 relatedCategory,
                 relatedMonth: monthId || null,
-                paid: isFixCost ? value : 0,
                 createdAt: new Date()
             }
         
@@ -75,6 +74,10 @@ export const useCostsStore = defineStore("costsStore", () => {
         saveCosts(costs.value);
     }
 
+    const getVarCostPaidValueById = (id) => {
+        return costPayments.value.filter((cp) => cp.relatedCostId === id).reduce((acc, curr) => acc + curr.value, 0);
+    }
+
     const costPayments = ref([]);
     const addCostPayment = (relatedCostId, value, comment = '') => {
         const cost = getCostById(relatedCostId);
@@ -86,15 +89,27 @@ export const useCostsStore = defineStore("costsStore", () => {
                 comment,
                 createdAt: new Date()
             };
-            cost.paid = cost.paid + value;
             costPayments.value = [...costPayments.value, costPayment];
             saveCostPayments(costPayments.value);
-            saveCosts(costs.value);
+        }
+    }
+    
+    const editCostPayment = (paymentId, value, comment = '') => {
+        const costPayment = costPayments.value.find((cp) => cp.id === paymentId);
+        if (costPayment) {
+            costPayment.value = value;
+            costPayment.comment = comment;
+            saveCostPayments(costPayments.value);
         }
     }
 
     const getCostPaymentsForRelatedCost = (relatedCostId) => {
         return costPayments.value.filter((cp) => cp.relatedCostId === relatedCostId);
+    };
+
+    const removeCostPaymentById = (id) => {
+        costPayments.value = costPayments.value.filter((cp) => cp.id !== id);
+        saveCostPayments(costPayments.value);
     };
 
     const removeCostPaymentByCostId = (costId) => {
@@ -224,7 +239,7 @@ export const useCostsStore = defineStore("costsStore", () => {
             };
             const relatedCosts = getCostsForCategoryGroup(cGroup.id, monthId);
             if (relatedCosts && relatedCosts.length > 0) {
-                dataEntry.value = relatedCosts.reduce((acc, curr) => acc + curr.reduce((a, c) => a + c.paid, 0), 0);
+                dataEntry.value = relatedCosts.reduce((acc, curr) => acc + curr.reduce((a, c) => a + c.isFixCost ? c.value : getVarCostPaidValueById(c.id), 0), 0);
             }
             if (dataEntry.value > 0) {
                 data.push(dataEntry);
@@ -243,7 +258,10 @@ export const useCostsStore = defineStore("costsStore", () => {
         removeCostById,
         removeCostsByCategory,
         removeCostsByMonth,
+        getVarCostPaidValueById,
         addCostPayment,
+        editCostPayment,
+        removeCostPaymentById,
         getCostPaymentsForRelatedCost,
         getFixCostCategories,
         getVarCostCategories,

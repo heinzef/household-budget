@@ -6,7 +6,9 @@
 			<NavigationItem page="sinkingfunds" icon="pi-wallet" />
 			<!---<NavigationItem page="charts" icon="pi-chart-pie" />-->
 		</div>
-		<Avatar image="/profile_light.jpg" class="profile-icon" size="large" shape="circle" @click="() => navigationStore.setActivePage('profile')" />
+		<Avatar v-if="profileStore.hasUserName" :label="profileStore.getUserName.charAt(0)" class="profile-icon"
+			 size="large" shape="circle" @click="() => navigationStore.setActivePage('profile')" />
+		<Avatar v-else icon="pi pi-user" class="profile-icon" size="large" shape="circle" @click="() => navigationStore.setActivePage('profile')"/>
 	</div>
 </template>
 
@@ -14,8 +16,10 @@
 import NavigationItem from './NavigationItem.vue';
 
 import { useNavigationStore } from '@/stores/navigation';
+import { useProfileStore } from '@/stores/profile';
 
 const navigationStore = useNavigationStore();
+const profileStore = useProfileStore();
 </script>
 
 <style scoped lang="scss">

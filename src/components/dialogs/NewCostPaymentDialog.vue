@@ -1,5 +1,5 @@
 <template>
-  <Dialog :header="`Neuer Kosteneintrag für ${relatedCostName}`" v-model:visible="dialogStore.isNewCostPaymentDialogOpen"
+  <Dialog :header="header" v-model:visible="dialogStore.isNewCostPaymentDialogOpen"
     :breakpoints="{'960px': '75vw', '640px': '90vw'}" :style="{width: '40vw'}" :modal="true" :draggable="false">
     <div>
       <div><label>Betrag:</label></div>
@@ -7,12 +7,12 @@
         <span class="p-inputgroup-addon">
             <i class="pi pi-euro"></i>
         </span>
-        <InputNumber v-model="amountOfMoney" @keyup.enter="saveNewCostPayment"
+        <InputNumber v-model="dialogStore.newCostPaymentAmount" @keyup.enter="saveNewCostPayment"
           mode="decimal" locale="de-DE" :minFractionDigits="2"/>
       </div>
       <div><label>Kommentar:</label></div>
       <div class="p-inputgroup">
-          <InputText v-model="commentValue" @keyup.enter="saveNewCostPayment"/>
+          <InputText v-model="dialogStore.newCostPaymentComment" @keyup.enter="saveNewCostPayment"/>
       </div>
     </div>
     <template #footer>
@@ -23,7 +23,7 @@
 </template>
     
 <script setup>
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 import { useDialogStore } from '@/stores/dialogs';
 import { useCostsStore } from '@/stores/costs';
@@ -34,11 +34,21 @@ const costsStore = useCostsStore();
 const relatedCostName = computed(() => dialogStore.newCostPaymentRelatedCostName);
 const relatedCostId = computed(() => dialogStore.newCostPaymentRelatedCostId);
 
-const amountOfMoney = ref(0);
-const commentValue = ref('');
+const isInEditMode = computed(() => dialogStore.newCostPaymentIsInEditMode);
+const editItemId = computed(() => dialogStore.newCostPaymentEditItemId);
+
+const header = computed(() => {
+  if (isInEditMode.value) return 'Kosteneintrag bearbeiten';
+  return `Neuer Kosteneintrag für ${relatedCostName.value}`;
+});
+
 
 const saveNewCostPayment = () => {
-  costsStore.addCostPayment(relatedCostId.value, amountOfMoney.value, commentValue.value);
+  if (isInEditMode.value) {
+    costsStore.editCostPayment(editItemId.value, dialogStore.newCostPaymentAmount, dialogStore.newCostPaymentComment);
+  } else {
+    costsStore.addCostPayment(relatedCostId.value, dialogStore.newCostPaymentAmount, dialogStore.newCostPaymentComment);
+  }
   dialogStore.hideNewCostPaymentDialog();
 };
 
