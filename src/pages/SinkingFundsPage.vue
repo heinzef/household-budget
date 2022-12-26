@@ -14,18 +14,23 @@
         <div class="sf-content-header">
           <LinkBox :showAddIncome="false" :showAddFixCost="false" :showAddVarCost="false" :showNewSinkingFund="true" />
         </div>
-        <DataTable :value="sinkingFundsStore.getSinkingFunds" responsiveLayout="scroll" :showGridlines="true">
+        <DataTable :value="sinkingFundsStore.getSinkingFundsSortable" responsiveLayout="scroll" :showGridlines="true" removableSort>
           <Column field="name" header="Name" :sortable="true" style="width: 60%"></Column>
-          <Column header="Wert" field="value" :sortable="true">
+          <Column header="Wert" field="value" :sortable="true"> 
             <template #body="{ data }">
             <span class="bold" :class="{'red': data.value < 0}">
-              {{ formatter.format(data.value + sinkingFundsStore.getPaymentsOfSinkingFundReduced(data.id)) }}
+              {{ formatter.format(data.value)}}
             </span>
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">
+            <template #body="{ data }">
+              <span class="action-icon" title="Ansehen" @click="dialogStore.openManageCategoriesDialog('sinkingfunds', data.id)"><i class="pi pi-list" /></span>
+            </template>
+          </Column>
+          <Column style="width: 2rem" class="non-print-column">
             <template #body="{data}">
-              <span class="action-icon" title="Editieren" @click="dialogStore.openNewCategoryDialog('sinkingfunds', data)"><i class="pi pi-pencil" /></span>
+              <span class="action-icon" title="Editieren" @click="dialogStore.openNewCategoryDialog('sinkingfunds', sinkingFundsStore.getSinkingFundById(data.id))"><i class="pi pi-pencil" /></span>
             </template>
           </Column>
           <Column style="width: 2rem" class="non-print-column">

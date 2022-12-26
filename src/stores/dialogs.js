@@ -133,9 +133,36 @@ export const useDialogStore = defineStore('dialogStore', () => {
     const newCostPaymentRelatedCostName = ref('');
     const newCostPaymentRelatedCostId = ref('');
 
-    const openNewCostPaymentDialog = (forCost, forCostId) => {
-        newCostPaymentRelatedCostName.value = forCost;
-        newCostPaymentRelatedCostId.value = forCostId;
+    const _newCostPaymentAmount = ref(0);
+    const newCostPaymentAmount = computed({
+        get: () => _newCostPaymentAmount.value,
+        set: (value) => _newCostPaymentAmount.value = value,
+    });
+
+    const _newCostPaymentComment = ref('');
+    const newCostPaymentComment = computed({
+        get: () => _newCostPaymentComment.value,
+        set: (value) => _newCostPaymentComment.value = value,
+    });
+
+    const newCostPaymentIsInEditMode = ref(false);
+    const newCostPaymentEditItemId = ref(null);
+
+    const openNewCostPaymentDialog = (forCost, forCostId, editItem = null) => {
+        if (forCost && forCostId && !editItem) {
+            newCostPaymentRelatedCostName.value = forCost;
+            newCostPaymentRelatedCostId.value = forCostId;
+            _newCostPaymentAmount.value = 0;
+            _newCostPaymentComment.value = '';
+            newCostPaymentIsInEditMode.value = false;
+            newCostPaymentEditItemId.value = null;
+        } else {
+            newCostPaymentRelatedCostId.value = editItem.relatedCostId;
+            _newCostPaymentAmount.value = editItem.value;
+            _newCostPaymentComment.value = editItem.comment;
+            newCostPaymentIsInEditMode.value = true;
+            newCostPaymentEditItemId.value = editItem.id;
+        }
         _newCostPaymentDialogOpen.value = true;
     };
 
@@ -215,6 +242,10 @@ export const useDialogStore = defineStore('dialogStore', () => {
         isNewCostPaymentDialogOpen,
         newCostPaymentRelatedCostName,
         newCostPaymentRelatedCostId,
+        newCostPaymentAmount,
+        newCostPaymentComment,
+        newCostPaymentIsInEditMode,
+        newCostPaymentEditItemId,
         openNewCostPaymentDialog,
         hideNewCostPaymentDialog,
         pieChartRelatedCategory,

@@ -6,6 +6,7 @@ import { saveSinkingFunds, loadSinkingFunds, saveSinkingFundPayments, loadSinkin
 export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
     const sinkingfunds = ref([]);
     const getSinkingFunds = computed(() => sinkingfunds.value);
+    const getSinkingFundsSortable = computed(() => sinkingfunds.value.map((sf) => ({ ...sf, value: sf.value + getPaymentsOfSinkingFundReduced(sf.id)})));
     const getSinkingFundsReduced = computed(() => sinkingfunds.value.reduce((acc, curr) => acc + curr.value + getPaymentsOfSinkingFundReduced(curr.id), 0));
 
     const getSinkingFundById = (id) => sinkingfunds.value.find((sf) => sf.id === id);
@@ -69,7 +70,7 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
                 id: v4(),
                 name,
                 value,
-                comment,
+                comment: value >= 0 ? 'Einzahlung' : comment,
                 relatedSF,
                 relatedMonth,
                 createdAt: new Date()
@@ -83,7 +84,7 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
                 sfpObject.value = value;
                 sfpObject.relatedSF = relatedSF,
                 sfpObject.relatedMonth = relatedMonth;
-                sfpObject.comment = comment;
+                sfpObject.comment = value >= 0 ? 'Einzahlung' : comment;
                 sinkingFundsPayments.value = [...sfpCopy];
             }
         }
@@ -110,6 +111,7 @@ export const useSinkingFundsStore = defineStore("sinkingFundsStore", () => {
 
     return {
         getSinkingFunds,
+        getSinkingFundsSortable,
         getSinkingFundsReduced,
         addSinkingFund,
         editSinkingFund,

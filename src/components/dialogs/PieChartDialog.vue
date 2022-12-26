@@ -1,7 +1,7 @@
 <template>
   <Dialog :header="header" v-model:visible="dialogStore.isPieChartDialogOpen" :breakpoints="{'960px': '75vw', '640px': '90vw'}" :style="{width: '50vw'}"
     :modal="true" :draggable="false">
-    <Chart type="doughnut" :data="chartData" style="width: 100%; display: flex; justify-content: center;"></Chart>
+    <Chart type="doughnut" :data="chartData" :options="chartOptions" style="width: 100%; display: flex; justify-content: center;"></Chart>
   </Dialog>
 </template>
 
@@ -14,6 +14,8 @@ import { useCostsStore } from '@/stores/costs';
 import { useSinkingFundsStore } from '@/stores/sinkingfunds';
 import { useMonthStore } from '@/stores/months';
 import { useDialogStore } from '@/stores/dialogs';
+
+import formatter from '@/helpers/formatter';
 
 const incomeStore = useIncomeStore();
 const costsStore = useCostsStore();
@@ -44,12 +46,32 @@ const chartData = computed(() => {
       labels: chartDataArray.map((i) => i.name),
       datasets: [
           {
-            label: 'Betrag (€)', // header.value,
             data: chartDataArray.map((i) => i.value),
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  return '';
+                }
+              }
+          }
           }
       ],
   }
   return chartObj;
+});
+
+const chartOptions = ref({
+  plugins: {
+    tooltip: {
+      callbacks: {
+        footer: (context) => {
+          const value = context[0].parsed;
+          const sum = context[0].dataset.data.reduce((acc, curr) => acc + curr, 0);
+          return [`Betrag: ${formatter.format(value)}`, `Anteil: ${(value * 100 / sum).toFixed(2)}%`];
+        }
+      }
+    }
+  }
 });
 </script>
 

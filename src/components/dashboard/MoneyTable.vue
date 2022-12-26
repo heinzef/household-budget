@@ -2,7 +2,7 @@
 <div>
   <div class="table-headline">
     <div>{{ props.header }}</div>
-    <div>Gesamt: {{ formatter.format(props.invert && props.balance < 0 ? props.balance * -1 : props.balance) }}</div>
+    <div>Gesamt: {{ formatter.format(props.invert && props.balance < 0 ? props.balance * -1 : props.balance) }} {{ additionalBalanceText }}</div>
   </div>
   <DataTable :value="props.entries" responsiveLayout="scroll" :showGridlines="true">
     <Column field="name" header="Name" style="width: 60%"></Column>
@@ -14,7 +14,7 @@
     </Column>
     <Column header="Ausgegeben"  v-if="props.showPay">
       <template #body="{ data }">
-        <span v-if="data.paid !== undefined">{{ formatter.format(data.paid) }}</span>
+        <span>{{ formatter.format(costsStore.getVarCostPaidValueById(data.id)) }}</span>
       </template>
     </Column>
     <Column style="width: 2rem" v-if="props.payable" class="non-print-column">
@@ -24,7 +24,7 @@
     </Column>
     <Column style="width: 2rem" v-if="props.payable" class="non-print-column">
       <template #body="{ data }">
-        <span class="action-icon" title="Eintragen" @click="dialogStore.openNewCostPaymentDialog(data.name, data.id)"><i class="pi pi-credit-card" /></span>
+        <span class="action-icon" title="Eintragen" @click="dialogStore.openNewCostPaymentDialog(data.name, data.id)"><i class="pi pi-plus" /></span>
       </template>
     </Column>
     <Column style="width: 2rem" class="non-print-column">
@@ -43,15 +43,22 @@
 
 <script setup>
 import { useDialogStore } from '@/stores/dialogs';
+import { useCostsStore } from '@/stores/costs';
+
 import formatter from '@/helpers/formatter';
 
 const dialogStore = useDialogStore();
+const costsStore = useCostsStore();
 
 const props = defineProps({
   entries: Array,
   balance: {
     type: Number,
     default: 0,
+  },
+  additionalBalanceText: {
+    type: String,
+    default: '',
   },
   header: String,
   showComments: {

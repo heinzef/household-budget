@@ -18,6 +18,7 @@
   <ManageCategoriesDialog />
   <PieChartDialog />
   <ConfirmDeleteDialog />
+  <UserNameDialog />
 </template>
 
 <script setup>
@@ -32,6 +33,7 @@ import NewCostPaymentDialog from './components/dialogs/NewCostPaymentDialog.vue'
 import ManageCategoriesDialog from './components/dialogs/ManageCategoriesDialog.vue';
 import PieChartDialog from './components/dialogs/PieChartDialog.vue';
 import ConfirmDeleteDialog from './components/dialogs/ConfirmDeleteDialog.vue';
+import UserNameDialog from './components/dialogs/UserNameDialog.vue';
 
 import { useColorStore } from '@/stores/colors'; 
 
