@@ -2,19 +2,24 @@
 <div>
   <div class="table-headline">
     <div>{{ props.header }}</div>
-    <div>Gesamt: {{ formatter.format(props.invert && props.balance < 0 ? props.balance * -1 : props.balance) }} {{ additionalBalanceText }}</div>
+    <div>Gesamt: {{ formatter.format(Math.abs(props.balance)) }} {{ additionalBalanceText }}</div>
   </div>
   <DataTable :value="props.entries" responsiveLayout="scroll" :showGridlines="true">
     <Column field="name" header="Name" style="width: 60%"></Column>
     <Column v-if="props.showComments" field="comment" header="Kommentar"></Column>
     <Column header="Wert">
       <template #body="{ data }">
-        {{ formatter.format(props.invert ? data.value * -1 : data.value) }}
+        {{ formatter.format(Math.abs(data.value)) }}
       </template>
     </Column>
     <Column header="Ausgegeben"  v-if="props.showPay">
       <template #body="{ data }">
         <span>{{ formatter.format(costsStore.getVarCostPaidValueById(data.id)) }}</span>
+      </template>
+    </Column>
+    <Column header="Verfügbar"  v-if="props.showPay">
+      <template #body="{ data }">
+        <span>{{ formatter.format(Math.abs(data.value) - costsStore.getVarCostPaidValueById(data.id)) }}</span>
       </template>
     </Column>
     <Column style="width: 2rem" v-if="props.payable" class="non-print-column">
