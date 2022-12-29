@@ -41,7 +41,7 @@ const chartData = computed(() => {
   if (relatedCategory.value === 'costs') chartDataArray = costsStore.getCostsForMonthGrouped(selectedMonth.value.id);
   if (relatedCategory.value === 'sinkingfunddeposit') chartDataArray = sinkingFundsStore.getPositiveSinkingFundPaymentsForMonth(selectedMonth.value.id);
   if (relatedCategory.value === 'sinkingfundwithdraw') chartDataArray = sinkingFundsStore.getNegativeSinkingFundPaymentsForMonth(selectedMonth.value.id);
-  chartDataArray = chartDataArray.sort((a, b) => a.value - b.value).reverse();
+  chartDataArray = chartDataArray.sort((a, b) => Math.abs(a.value) - Math.abs(b.value)).reverse();
   const chartObj = {
       labels: chartDataArray.map((i) => i.name),
       datasets: [
