@@ -46,7 +46,7 @@ const chartData = computed(() => {
       labels: chartDataArray.map((i) => i.name),
       datasets: [
           {
-            data: chartDataArray.map((i) => i.value),
+            data: chartDataArray.map((i) => Math.abs(i.value)),
             tooltip: {
               callbacks: {
                 label: (context) => {
