@@ -4,9 +4,7 @@ const localStorageKeys = ['lastPageVisited', 'costs_category_groups', 'costs', '
 export const exportLocalContentToFile = () => {
     const exportObj = {};
     for (const key of localStorageKeys) {
-        console.log(key);
         const localStorageItem = localStorage.getItem(key);
-        console.log(localStorageItem);
         if (localStorageItem) {
             if (key !== 'lastPageVisited') {
                 exportObj[key] = JSON.parse(localStorageItem);
@@ -27,7 +25,7 @@ export const importFileToLocalContent = (filecontent) => {
             if (key !== 'lastPageVisited') {
                 localStorage.setItem(key, JSON.stringify(importObj[key]));
             } else {
-                localStorage.setItem(key, importObj[key]);
+                localStorage.setItem('lastPageVisited', 'overview');
             }
         }
     }
