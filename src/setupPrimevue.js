@@ -13,6 +13,7 @@ import Column from 'primevue/column';
 import ScrollTop from 'primevue/scrolltop';
 import Chart from 'primevue/chart';
 import Message from 'primevue/message';
+import FileUpload from 'primevue/fileupload';
 
 
 
@@ -32,4 +33,5 @@ export default (app) => {
     app.component('ScrollTop', ScrollTop);
     app.component('Chart', Chart);
     app.component('Message', Message);
+    app.component('FileUpload', FileUpload);
 };

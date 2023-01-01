@@ -213,6 +213,17 @@ export const useDialogStore = defineStore('dialogStore', () => {
     };
     const hideManageCategoriesDialog = () => _manageCategoriesDialogOpen.value = false;
 
+    const _isImportDialogOpen = ref(false);
+    const isImportDialogOpen = computed({
+        get: () => _isImportDialogOpen.value,
+        set: (value) => _isImportDialogOpen.value = value,
+    });
+
+    const openImportDialog = () => {
+        _isImportDialogOpen.value = true;
+    };
+    const hideImportDialog = () => _isImportDialogOpen.value = false;
+
     return {
         newCategoryFor,
         newCategoryDialogEditMode,
@@ -261,5 +272,8 @@ export const useDialogStore = defineStore('dialogStore', () => {
         manageCategoriesDialogParentItem,
         openManageCategoriesDialog,
         hideManageCategoriesDialog,
+        isImportDialogOpen,
+        openImportDialog,
+        hideImportDialog,
     };
 });
