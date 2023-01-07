@@ -4,8 +4,12 @@
         <template #pageName>Spartöpfe</template>
         <template #pageDetailText>Verwalte Deine Spartöpfe und lege neue Sparziele an.</template>
         <template #rightContent>
-          <div class="balance" :class="{ 'red': sinkingFundsStore.getSinkingFundsReduced < 0 }">
-            Saldo: {{ formatter.format(sinkingFundsStore.getSinkingFundsReduced) }}
+          <div class="sf-header-panel">
+            <div class="balance" :class="{ 'red': sinkingFundsStore.getSinkingFundsReduced < 0 }">
+              Saldo: {{ formatter.format(sinkingFundsStore.getSinkingFundsReduced) }}
+            </div>
+            <div class="download-button" title="Spartöpfe als Excel-Datei exportieren"
+              @click="exportSinkingFundsToExcel()"><i class="pi pi-download" /></div>
           </div>
         </template>
     </DashboardHeader>
@@ -56,12 +60,32 @@ import { useNavigationStore } from '@/stores/navigation';
 import { useSinkingFundsStore } from '@/stores/sinkingfunds';
 import { useDialogStore } from '@/stores/dialogs';
 
+import { exportSinkingFundsToExcel } from '@/services/exports.service';
+
 const navigationStore = useNavigationStore();
 const dialogStore = useDialogStore();
 const sinkingFundsStore = useSinkingFundsStore();
 </script>
 
 <style scoped lang="scss">
+.sf-header-panel {
+  display: grid;
+  grid-template-columns: 5fr 1fr;
+  align-items: center;
+  gap: 2rem;
+
+  .download-button {
+    cursor: pointer;
+
+    &:hover {
+      color: #000;
+    }
+    .pi {
+      font-size: 1.1rem;
+    }
+  }
+
+}
 .balance {
   font-size: 1.25rem;
   font-weight: bold;

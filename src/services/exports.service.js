@@ -1,4 +1,6 @@
 import * as XLSX from 'xlsx';
+import dateformat from 'dateformat';
+
 import { useMonthStore } from '../stores/months';
 import { useIncomeStore } from '../stores/incomes';
 import { useCostsStore } from '../stores/costs';
@@ -62,7 +64,23 @@ export const exportSelectedMonthToExcel = () => {
     
 };
 
+export const exportSinkingFundsToExcel = () => {
+    const sinkingFundsStore = useSinkingFundsStore();
+    const sinkingfunds = sinkingFundsStore.getSinkingFundsSortable;
 
+    const wb = XLSX.utils.book_new();
+
+    // Spartöpfe Sheet
+    const sinkingfundsMapped = sinkingfunds.map((sf) => [sf.name, sf.value]);
+    const ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert'], ...sinkingfundsMapped]);
+    XLSX.utils.book_append_sheet(wb, ws, "Spartöpfe");
+
+    // Format Date for Filename
+    const dateNowAsString = dateformat(new Date(), 'dd-mm-yyyy_HH-MM-ss');
+
+    // Download
+    XLSX.writeFile(wb, `Spartoepfe_${dateNowAsString}.xlsx`);
+};
 
 
 const localStorageKeys = ['lastPageVisited', 'costs_category_groups', 'costs', 'profile', 'sinkingfunds', 'sinkingfunds_payments', 'costs_categories', 'colors',
