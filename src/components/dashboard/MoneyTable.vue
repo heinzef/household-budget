@@ -6,12 +6,12 @@
   </div>
   <DataTable :value="props.entries" responsiveLayout="scroll" :showGridlines="true">
     <Column field="name" header="Name" style="width: 60%"></Column>
-    <Column v-if="props.showComments" field="comment" header="Kommentar"></Column>
     <Column header="Wert">
       <template #body="{ data }">
         {{ formatter.format(Math.abs(data.value)) }}
       </template>
     </Column>
+    <Column v-if="props.showComments" field="comment" header="Kommentar"></Column>
     <Column header="Ausgegeben"  v-if="props.showPay">
       <template #body="{ data }">
         <span>{{ formatter.format(costsStore.getVarCostPaidValueById(data.id)) }}</span>
