@@ -1,3 +1,70 @@
+import * as XLSX from 'xlsx';
+import { useMonthStore } from '../stores/months';
+import { useIncomeStore } from '../stores/incomes';
+import { useCostsStore } from '../stores/costs';
+import { useSinkingFundsStore } from '../stores/sinkingfunds';
+
+export const exportSelectedMonthToExcel = () => {
+    const monthStore = useMonthStore();
+    const selectedMonth = monthStore.selectedMonth;
+    if (selectedMonth) {
+
+        const incomeStore = useIncomeStore();
+        const costsStore = useCostsStore();
+        const sinkingFundsStore = useSinkingFundsStore();
+
+        const wb = XLSX.utils.book_new();
+        
+        // Übersicht Sheet
+        let sheetData = [
+            incomeStore.getIncomesForMonthReduced(selectedMonth.id),
+            costsStore.getFixCostsForMonthReduced(selectedMonth.id) + costsStore.getVarCostsForMonthReduced(selectedMonth.id),
+            sinkingFundsStore.getPositiveSinkingFundPaymentsForMonthReduced(selectedMonth.id),
+            sinkingFundsStore.getNegativeSinkingFundPaymentsForMonthReduced(selectedMonth.id)
+        ];
+        let ws = XLSX.utils.aoa_to_sheet([['Einnahmen', 'Kosten', 'Spartopf Einzahlung', 'Spartopf Ausgaben'], sheetData]);
+        XLSX.utils.book_append_sheet(wb, ws, "Übersicht");
+
+        // Einnahmen Sheet
+        const incomes = incomeStore.getIncomesForMonth(selectedMonth.id);
+        const incomesMapped = incomes.map((inc) => [inc.name, inc.value]);
+        ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert'], ...incomesMapped]);
+        XLSX.utils.book_append_sheet(wb, ws, "Einnahmen");
+
+        // Fixkosten Sheet
+        const fixcosts = costsStore.getFixCostsForMonth(selectedMonth.id);
+        const fixcostsMapped = fixcosts.map((c) => [c.name, c.value]);
+        ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert'], ...fixcostsMapped]);
+        XLSX.utils.book_append_sheet(wb, ws, "Fixkosten");
+
+        // Var. Kosten Sheet
+        const varcosts = costsStore.getVarCostsForMonth(selectedMonth.id);
+        const varcostsMapped = varcosts.map((c) => [c.name, c.value, costsStore.getVarCostPaidValueById(c.id), Math.abs(c.value) - costsStore.getVarCostPaidValueById(c.id)]);
+        ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert', 'Ausgegeben', 'Verfügbar'], ...varcostsMapped]);
+        XLSX.utils.book_append_sheet(wb, ws, "Variable Kosten");
+
+        // Spartopf-Einzahlungen Sheet
+        let payments = sinkingFundsStore.getPositiveSinkingFundPaymentsForMonth(selectedMonth.id);
+        let paymentsMapped = payments.map((p) => [p.name, p.value]);
+        ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert'], ...paymentsMapped]);
+        XLSX.utils.book_append_sheet(wb, ws, "Spartopf-Einzahlungen");
+
+        // Spartopf-Ausgaben Sheet
+        payments = sinkingFundsStore.getNegativeSinkingFundPaymentsForMonth(selectedMonth.id);
+        paymentsMapped = payments.map((p) => [p.name, Math.abs(p.value), p.comment]);
+        ws = XLSX.utils.aoa_to_sheet([['Name', 'Wert', 'Kommentar'], ...paymentsMapped]);
+        XLSX.utils.book_append_sheet(wb, ws, "Spartopf-Ausgaben");
+
+
+        // Download
+        XLSX.writeFile(wb, `${selectedMonth.name}.xlsx`);
+    }
+    
+};
+
+
+
+
 const localStorageKeys = ['lastPageVisited', 'costs_category_groups', 'costs', 'profile', 'sinkingfunds', 'sinkingfunds_payments', 'costs_categories', 'colors',
     'incomes', 'months', 'income_categories', 'cost_payments'];
 

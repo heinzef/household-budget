@@ -7,8 +7,12 @@
         <span>!</span>      
       </template>
       <template #rightContent>
-        <Dropdown class="month-select" :filter="true" v-model="selectedMonth"
+        <div class="overview-header-panel">
+          <Dropdown class="month-select" :filter="true" v-model="selectedMonth"
             placeholder="Wähle einen Monat" :options="monthStore.getMonthsForDropdown" optionLabel="name" />
+          <div class="download-month-button" title="Monat als Excel-Datei exportieren"
+            @click="exportSelectedMonthToExcel()"><i class="pi pi-download" /></div>
+        </div>
       </template>
     </DashboardHeader>
     <div class="dashboard-content">
@@ -93,6 +97,8 @@ import { useNavigationStore } from '@/stores/navigation';
 import { useDialogStore } from '@/stores/dialogs';
 import { useProfileStore } from '@/stores/profile';
 
+import { exportSelectedMonthToExcel } from '@/services/exports.service';
+
 
 import formatter from '@/helpers/formatter';
 
@@ -128,6 +134,24 @@ const greeting = computed(() => {
 </script>
   
 <style scoped lang="scss">
+.overview-header-panel {
+  display: grid;
+  grid-template-columns: 5fr 1fr;
+  align-items: center;
+  gap: 2rem;
+
+  .download-month-button {
+    cursor: pointer;
+
+    &:hover {
+      color: #000;
+    }
+    .pi {
+      font-size: 1.1rem;
+    }
+  }
+
+}
 .month-select {
   max-width: 400px;
   border: 0;
